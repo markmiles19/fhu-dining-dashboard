@@ -1,0 +1,26 @@
+{
+    "diningDollars" : {
+        "remaining": 43.98,
+        "total": 175,
+        "renewal": "semester"
+    },
+    "meals" : {
+        "remaining": 6,
+        "total": 14,
+        "renewal": "week"
+    },
+    "lionsPrideExpress" : {
+        "remaining": 4,
+        "total": 5,
+        "renewal": "week"
+    },
+    "chickFilA" : {
+        "remaining": 0,
+        "total": 2,
+        "renewal": "week"
+    },
+    "guestMeals" : {
+        "remaining": 4,
+        "total": 5
+    }
+}
