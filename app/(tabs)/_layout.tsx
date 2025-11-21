@@ -24,30 +24,18 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="menu"
+        name="profile"
         options={{
-          title: 'Menu',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="paperplane.fill" color={color} />,
+          title: 'Profile',
+          tabBarIcon: ({ color }) => (
+            <IconSymbol size={28} name="chart.bar.fill" color={color} />
+          ),
         }}
       />
       <Tabs.Screen
-        name="history"
+        name="transactions"
         options={{
-          title: 'History',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="paperplane.fill" color={color} />,
-        }}
-      />
-      <Tabs.Screen
-        name="flatlist"
-        options={{
-          title: 'Flatlist',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="paperplane.fill" color={color} />,
-        }}
-      />
-      <Tabs.Screen
-        name="dashboard"
-        options={{
-          title: 'Dashboard',
+          title: 'Transactions',
           tabBarIcon: ({ color }) => (
             <IconSymbol size={28} name="chart.bar.fill" color={color} />
           ),

@@ -91,5 +91,3 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
 });
-
-// Find the proper way to import transactions and calculate remaining.

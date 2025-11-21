@@ -1,95 +1,123 @@
-import { Text } from '@/components/Themed';
-import { useTransactions } from '@/contexts/TransactionContext';
-import { useEffect, useState } from 'react';
-import { ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { useEffect } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { ScrollView, StyleSheet, View, ActivityIndicator } from 'react-native';
+import { Text } from '@/components/Themed';
+// import { useMealSwipeData } from '@/contexts/MealSwipeDataContext';
 
-const BASE_URL = "https://api.fhumealtracker.fhu.edu/data.json"
+export default function RecentTransactionsScreen() {
+  const {
+    transactions,
+    isLoading,
+    error,
+    fetchMealData,
+  } = useMealSwipeData();
 
-export default async function HomeScreen() {
-  const [username, setUsername] = useState("username");
-  const [password, setPassword] = useState("password");
-  const { totalsByTag } = useTransactions();
+  const username = "username";
+  const password = "password";
 
-  const getData = async () => {
-    const response = await fetch(BASE_URL)
-    const data = await response.json()
-
-    console.log(data)
-
-    setMealsRemaining(data.meals.remaining);
-  }
-
-  useEffect(()=> {
-    getData()
+  useEffect(() => {
+    fetchMealData(username, password);
   }, []);
 
-  const contactSupport = () => {
-    Linking.openURL("mailto:ttenon@fhu.edu");
-  };
-
   return (
-    <SafeAreaView style={{ flex: 1 }}>
-      <ScrollView
-        contentContainerStyle={styles.scrollContainer}
-        showsVerticalScrollIndicator={false}
-      >
-        <View style={styles.card}>
-          <Text style={styles.label}>Username</Text>
-          <Text style={styles.value}>{username}</Text>
+    <SafeAreaView style={styles.container}>
+      <Text style={styles.header}>Recent Transactions</Text>
 
-          <Text style={styles.label}>Password</Text>
-          <Text style={styles.value}>{password}</Text>
+      {isLoading && (
+        <ActivityIndicator size="large" style={{ marginTop: 20 }} />
+      )}
 
-          <Text style={styles.label}>Meal Plan</Text>
-          <Text style={styles.value}>{mealPlan}</Text>
-        </View>
+      {error && (
+        <Text style={styles.error}>{error}</Text>
+      )}
 
-        <TouchableOpacity style={styles.button} onPress={contactSupport}>
-          <Text style={styles.buttonText}>Contact Support</Text>
-        </TouchableOpacity>
+      {!isLoading && !error && (
+        <ScrollView contentContainerStyle={styles.list}>
+          {transactions.length === 0 && (
+            <Text>No transactions found.</Text>
+          )}
 
-        <TouchableOpacity style={[styles.button, styles.logout]} onPress={logout}>
-          <Text style={styles.buttonText}>Log Out</Text>
-        </TouchableOpacity>
+          {transactions.map((tx, index) => (
+            <View key={index} style={styles.card}>
+              <View style={styles.row}>
+                <Text style={styles.label}>Date</Text>
+                <Text style={styles.value}>{tx.date}</Text>
+              </View>
 
-      </ScrollView>
+              <View style={styles.row}>
+                <Text style={styles.label}>Time</Text>
+                <Text style={styles.value}>{tx.time}</Text>
+              </View>
+
+              <View style={styles.row}>
+                <Text style={styles.label}>Description</Text>
+                <Text style={styles.value}>{tx.description}</Text>
+              </View>
+
+              <View style={styles.row}>
+                <Text style={styles.label}>Account</Text>
+                <Text style={styles.value}>{tx.account}</Text>
+              </View>
+
+              <View style={styles.row}>
+                <Text style={styles.label}>Amount</Text>
+                <Text style={styles.amount}>
+                  {tx.amount || "-"}
+                </Text>
+              </View>
+            </View>
+          ))}
+        </ScrollView>
+      )}
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  button: {
-    width: "100%",
-    paddingVertical: 16,
-    backgroundColor: "#f44949ff",
-    borderRadius: 12,
+  container: {
+    flex: 1,
+    padding: 25,
     alignItems: "center",
+  },
+  header: {
+    fontSize: 28,
+    fontWeight: "700",
     marginBottom: 20,
   },
-  buttonText: {
-    color: "#fff",
-    fontSize: 18,
-    fontWeight: "600",
-  },
-  scrollContainer: {
-    alignItems: 'center',
-    paddingVertical: 50,
-    paddingBottom: 100,
-  },
-  modeText: {
-    fontSize: 18,
-    marginBottom: 20,
-  },
-  subtitle: {
+  error: {
     marginTop: 20,
+    color: "red",
     fontSize: 16,
   },
-  title: {
-    fontSize: 24,
-    fontWeight: '700',
-    marginBottom: 12,
+  list: {
+    width: "100%",
+    paddingBottom: 80,
+  },
+  card: {
+    backgroundColor: "#fff",
+    padding: 16,
+    borderRadius: 14,
+    marginBottom: 16,
+    shadowColor: "#000",
+    shadowOpacity: 0.1,
+    shadowOffset: { width: 0, height: 4 },
+    shadowRadius: 8,
+  },
+  row: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginVertical: 6,
+  },
+  label: {
+    fontSize: 14,
+    color: "#777",
+  },
+  value: {
+    fontSize: 16,
+    fontWeight: "600",
+  },
+  amount: {
+    fontSize: 16,
+    fontWeight: "700",
   },
 });
-
-// Find the proper way to import transactions and calculate remaining.
