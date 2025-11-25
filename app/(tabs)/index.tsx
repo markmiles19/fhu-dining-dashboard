@@ -42,19 +42,13 @@ export default async function HomeScreen() {
 
   const [mealsRemaining, setMealsRemaining] = useState(0)
 
-  const totalLionBucks = 180.00;
+  const totalMeals = 14;
 
   const totalDD = 150.00;
-  const remainingDD = totalDD - totalsByTag['Starbucks'];
 
-  const totalMeals = 14;
-  const remainingMeals = totalMeals - totalsByTag['Jones'];
+  const totalLionBucks = 0.00;
 
-  const totalLionsPride = 5;
-  const remainingLionsPride = totalLionsPride - totalsByTag['LP'];
-
-  const totalCFA = 2;
-  const remainingCFA = totalCFA - totalsByTag['CFA'];
+  const totalGuest = 5;
 
   const handleGetHtml = async () => {
     try {
@@ -71,13 +65,7 @@ export default async function HomeScreen() {
         contentContainerStyle={styles.scrollContainer}
         showsVerticalScrollIndicator={false}
       >
-        <ThemedText> username: </ThemedText>
-        <TextInput value={username} onChangeText={setUsername} style={styles.input}/>
-
-        <ThemedText> password: </ThemedText>
-        <TextInput value={password} onChangeText={setPassword} style={styles.input}  />
-
-        <ThemedView style={styles.buttonContainer}>
+        {/* <ThemedView style={styles.buttonContainer}>
           <Pressable
             style={[
               styles.button,
@@ -93,13 +81,13 @@ export default async function HomeScreen() {
               {isLoading ? "Loading..." : "Fetch Meal Data"}
             </ThemedText>
           </Pressable>
-        </ThemedView>
+        </ThemedView> */}
         <Separator />
 
         {/* JONES MEALS */}
-        <Text style={styles.title}>Jones Dining Hall Meals</Text>
+        <Text style={styles.title}>Meal Swipes</Text>
         <CircularProgress
-          value={remainingMeals}
+          value={totalMeals}
           radius={56}
           maxValue={14}
           duration={14}
@@ -114,10 +102,10 @@ export default async function HomeScreen() {
         </Text>
         <Separator />
 
-        {/* LION'S PRIDE */}
-        <Text style={styles.title}>Lion's Pride Meals</Text>
+        {/* GUEST MEALS */}
+        <Text style={styles.title}>Guest Swipes</Text>
         <CircularProgress
-          value={remainingLionsPride}
+          value={totalGuest}
           radius={56}
           maxValue={5}
           duration={5}
@@ -128,14 +116,14 @@ export default async function HomeScreen() {
           progressValueStyle={{ fontWeight: '600' }}
         />
         <Text style={styles.subtitle}>
-          Total: {totalLionsPride}
+          Total: {totalGuest}
         </Text>
         <Separator />
 
         {/* DINING DOLLARS */}
         <Text style={styles.title}>Dining Dollars</Text>
         <CircularProgress
-          value={remainingDD}
+          value={totalDD}
           radius={56}
           maxValue={150}
           duration={150}
@@ -151,22 +139,13 @@ export default async function HomeScreen() {
         </Text>
         <Separator />
 
-        {/* CHICK-FIL-A */}
-        <Text style={styles.title}>Chick-Fil-A Meals</Text>
-        <CircularProgress
-          value={remainingCFA}
-          radius={56}
-          maxValue={2}
-          duration={2}
-          activeStrokeWidth={12}
-          inActiveStrokeWidth={12}
-          activeStrokeColor="#f44949ff"
-          inActiveStrokeColor="#E8EAF0"
-          progressValueStyle={{ fontWeight: '600' }}
-        />
-        <Text style={styles.subtitle}>
-          Total: {totalCFA}
-        </Text>
+        {/* LIONBUCKS */}
+        <Text style={styles.title}>Lionbucks</Text>
+        <ThemedView style={styles.lionbucksBox}>
+          <Text style={styles.lionbucksAmount}>
+            ${totalLionBucks.toFixed(2)}
+          </Text>
+        </ThemedView>
         <Separator />
 
       </ScrollView>
@@ -214,6 +193,20 @@ const styles = StyleSheet.create({
     paddingVertical: 50,
     paddingBottom: 100,
   },
+  lionbucksAmount: {
+    color: "#f44949ff",
+    fontSize: 28,
+    fontWeight: "700",
+  },
+  lionbucksBox: {
+    width: 140,
+    paddingVertical: 20,
+    borderRadius: 12,
+    backgroundColor: "#E8EAF0",
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: 10,
+  },
   modeText: {
     fontSize: 18,
     marginBottom: 20,
@@ -228,5 +221,3 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
 });
-
-// Find the proper way to import transactions and calculate remaining.

@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ScrollView, StyleSheet, View, ActivityIndicator } from 'react-native';
 import { Text } from '@/components/Themed';
-// import { useMealSwipeData } from '@/contexts/MealSwipeDataContext';
+import { useMealSwipeData } from "@/hooks/use-meal-swipe-data";
 
 export default function RecentTransactionsScreen() {
   const {
@@ -11,13 +11,6 @@ export default function RecentTransactionsScreen() {
     error,
     fetchMealData,
   } = useMealSwipeData();
-
-  const username = "username";
-  const password = "password";
-
-  useEffect(() => {
-    fetchMealData(username, password);
-  }, []);
 
   return (
     <SafeAreaView style={styles.container}>

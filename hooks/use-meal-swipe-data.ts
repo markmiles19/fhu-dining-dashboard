@@ -32,6 +32,7 @@ export function useMealSwipeData() {
   const [mealSwipes, setMealSwipes] = useState<string | null>(null);
   const [guestSwipes, setGuestSwipes] = useState<string | null>(null);
   const [transactions, setTransactions] = useState<MealTransaction[]>([]);
+  const [mealPlan, setMealPlan] = useState<MealPlan | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -224,12 +225,14 @@ export function useMealSwipeData() {
           mealSwipes,
           guestSwipes,
           transactions,
+          mealPlan: extractedMealPlan,
         } = extractData(html);
         setDiningDollars(diningDollars);
         setLionBucks(lionBucks);
         setMealSwipes(mealSwipes);
         setGuestSwipes(guestSwipes);
         setTransactions(transactions);
+        setMealPlan(extractedMealPlan);
       } catch (err) {
         const errorMessage =
           err instanceof Error ? err.message : "An unknown error occurred";
@@ -248,6 +251,7 @@ export function useMealSwipeData() {
     mealSwipes,
     guestSwipes,
     transactions,
+    mealPlan,
     isLoading,
     error,
     fetchMealData,
