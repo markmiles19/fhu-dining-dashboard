@@ -9,55 +9,27 @@ import { Pressable, ScrollView, StyleSheet, TextInput } from 'react-native';
 import CircularProgress from 'react-native-circular-progress-indicator';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-const BASE_URL = "https://api.fhumealtracker.fhu.edu/data.json"
-
-export default async function HomeScreen() {
-  const [username, setUsername] = useState("username");
-  const [password, setPassword] = useState("password");
-  const { totalsByTag } = useTransactions();
+export default function HomeScreen() {
 
   const {
-    // diningDollars,
-    // lionBucks,
-    // mealSwipes,
-    // guestSwipes,
-    // transactions,
+    diningDollars,
+    lionBucks,
+    mealSwipes,
+    guestSwipes,
+    mealPlan,
     isLoading,
-    // error,
+    error,
     fetchMealData,
   } = useMealSwipeData();
 
-  const getData = async () => {
-    const response = await fetch(BASE_URL)
-    const data = await response.json()
-
-    console.log(data)
-
-    setMealsRemaining(data.meals.remaining);
-  }
-
-  useEffect(()=> {
-    getData()
-  }, []);
-
-  const [mealsRemaining, setMealsRemaining] = useState(0)
-
-  const totalMeals = 14;
-
-  const totalDD = 150.00;
-
-  const totalLionBucks = 0.00;
-
-  const totalGuest = 5;
-
-  const handleGetHtml = async () => {
-    try {
-      await fetchMealData(username, password);
-    }
-    catch (err) {
-      console.log(err)
-    }
-  };
+  // const handleGetHtml = async () => {
+  //   try {
+  //     await fetchMealData(username, password);
+  //   }
+  //   catch (err) {
+  //     console.log(err)
+  //   }
+  // };
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
@@ -87,10 +59,10 @@ export default async function HomeScreen() {
         {/* JONES MEALS */}
         <Text style={styles.title}>Meal Swipes</Text>
         <CircularProgress
-          value={totalMeals}
+          value={Number(mealSwipes ?? 0)}
           radius={56}
-          maxValue={14}
-          duration={14}
+          maxValue={mealPlan?.totalMeals ?? 0}
+          duration={mealPlan?.totalMeals ?? 0}
           activeStrokeWidth={12}
           inActiveStrokeWidth={12}
           activeStrokeColor="#f44949ff"
@@ -98,17 +70,17 @@ export default async function HomeScreen() {
           progressValueStyle={{ fontWeight: '600' }}
         />
         <Text style={styles.subtitle}>
-          Total: {totalMeals}
+          Total: {mealPlan?.totalMeals ?? 0}
         </Text>
         <Separator />
 
         {/* GUEST MEALS */}
         <Text style={styles.title}>Guest Swipes</Text>
         <CircularProgress
-          value={totalGuest}
+          value={Number(guestSwipes ?? 0)}
           radius={56}
-          maxValue={5}
-          duration={5}
+          maxValue={mealPlan?.totalGuestSwipes ?? 0}
+          duration={mealPlan?.totalGuestSwipes ?? 0}
           activeStrokeWidth={12}
           inActiveStrokeWidth={12}
           activeStrokeColor="#f44949ff"
@@ -116,17 +88,17 @@ export default async function HomeScreen() {
           progressValueStyle={{ fontWeight: '600' }}
         />
         <Text style={styles.subtitle}>
-          Total: {totalGuest}
+          Total: {mealPlan?.totalGuestSwipes ?? 0}
         </Text>
         <Separator />
 
         {/* DINING DOLLARS */}
         <Text style={styles.title}>Dining Dollars</Text>
         <CircularProgress
-          value={totalDD}
+          value={Number(diningDollars ?? 0)}
           radius={56}
-          maxValue={150}
-          duration={150}
+          maxValue={mealPlan?.totalDiningDollars ?? 0}
+          duration={mealPlan?.totalDiningDollars ?? 0}
           activeStrokeWidth={12}
           inActiveStrokeWidth={12}
           activeStrokeColor="#f44949ff"
@@ -135,7 +107,7 @@ export default async function HomeScreen() {
           valuePrefix="$"
         />
         <Text style={styles.subtitle}>
-          Total: ${totalDD}
+          Total: ${mealPlan?.totalDiningDollars ?? 0}
         </Text>
         <Separator />
 
@@ -143,7 +115,7 @@ export default async function HomeScreen() {
         <Text style={styles.title}>Lionbucks</Text>
         <ThemedView style={styles.lionbucksBox}>
           <Text style={styles.lionbucksAmount}>
-            ${totalLionBucks.toFixed(2)}
+            ${lionBucks ?? 0}
           </Text>
         </ThemedView>
         <Separator />

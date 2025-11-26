@@ -1,6 +1,7 @@
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import type { CheerioAPI } from "cheerio";
 import * as cheerio from "cheerio/slim";
-import { useCallback, useState } from "react";
+import { useCallback, useState, useEffect } from "react";
 
 interface MealPlan {
   name: string;
@@ -27,33 +28,47 @@ interface MealSwipeData {
 }
 
 export function useMealSwipeData() {
+  const [username, setUsername] = useState<string | null>(null);
+  const [password, setPassword] = useState<string | null>(null);
   const [diningDollars, setDiningDollars] = useState<string | null>(null);
   const [lionBucks, setLionBucks] = useState<string | null>(null);
   const [mealSwipes, setMealSwipes] = useState<string | null>(null);
   const [guestSwipes, setGuestSwipes] = useState<string | null>(null);
   const [transactions, setTransactions] = useState<MealTransaction[]>([]);
-  const [mealPlan, setMealPlan] = useState<MealPlan | null>(null);
+  // const [mealPlan, setMealPlan] = useState<MealPlan | null>(null);
+  const [mealPlan, setMealPlan] = useState<MealPlan>({
+    name: "",
+    totalMeals: 0,
+    totalDiningDollars: 0,
+    totalGuestSwipes: 0,
+  });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const saveCredentials = async (user: string, pass: string) => {
+    try {
+      await AsyncStorage.setItem("username", user);
+      await AsyncStorage.setItem("password", pass);
+      setUsername(user);
+      setPassword(pass);
+    } catch (err) {
+      console.log("Error saving credentials", err);
+    }
+  };
 
   const scrapeWithLogin = useCallback(
     async (username: string, password: string): Promise<string> => {
       try {
-        //console.log("Starting Scrape");
-
         const URLParametersString = new URLSearchParams({
           username: `${username}`,
           password: `${password}`,
           action: "Login",
         }).toString();
 
-        //console.log(URLParametersString);
-
         const baseURL = "https://fhu.campuscardcenter.com/ch/";
         const fullURL =
           baseURL +
           `login.html?username=${username}&password=${password}&action=Login`;
-        //console.log(fullURL);
 
         // Step 1: Login
         const loginResponse = await fetch(fullURL, {
@@ -64,9 +79,6 @@ export function useMealSwipeData() {
           },
           body: URLParametersString,
         });
-
-        //console.log("Response status:", loginResponse.status);
-        //console.log("Response headers:", loginResponse.headers);
 
         if (!loginResponse.ok) {
           const responseText = await loginResponse.text();
@@ -100,12 +112,11 @@ export function useMealSwipeData() {
       .map((_, el) =>
         $(el)
           .text()
-          .replace(/\u00A0/g, " ") // replace non-breaking space char with space
+          .replace(/\u00A0/g, " ")
           .trim()
       )
       .get();
 
-    // Find all tr elements that have a td with a div that has align="right"
     const rows = $('tr:has(td div[align="right"])');
 
     let lionBucks = null;
@@ -119,9 +130,7 @@ export function useMealSwipeData() {
       totalGuestSwipes: 0,
     };
 
-    // iterate over each tr
     rows.each((index, row) => {
-      // only process the first 4 rows
       if (index > 3) {
         return;
       }
@@ -172,16 +181,14 @@ export function useMealSwipeData() {
       )} ${mealSwipes} | ${guestSwipes} | ${diningDollars} | ${lionBucks}`
     );
 
-    const transactions = $("tr#EntryRow") // or: $('tr[id="EntryRow"]')
+    const transactions = $("tr#EntryRow")
       .toArray()
       .map((tr) => {
-        // Get direct TD children -> array of trimmed text
         const tds = $(tr)
           .children("td")
           .toArray()
           .map(
             (td) => $(td).text().trim()
-            //$(td).text().replace(/\u00A0/g, ' ').trim()
           );
 
         return {
@@ -193,9 +200,6 @@ export function useMealSwipeData() {
         };
       });
 
-    //console.log(transactions);
-
-    // the 4 pieces of data are in the first 4 div[align=right] nodes
     return {
       diningDollars,
       lionBucks,
@@ -204,13 +208,6 @@ export function useMealSwipeData() {
       transactions,
       mealPlan,
     };
-    // return {
-    //   diningDollars: data[0],
-    //   lionBucks: data[1],
-    //   mealSwipes: data[2],
-    //   guestSwipes: data[3],
-    //   transactions,
-    // };
   };
 
   const fetchMealData = useCallback(
@@ -218,26 +215,22 @@ export function useMealSwipeData() {
       setIsLoading(true);
       setError(null);
       try {
+        await saveCredentials(username, password);
+
         const html = await scrapeWithLogin(username, password);
-        const {
-          diningDollars,
-          lionBucks,
-          mealSwipes,
-          guestSwipes,
-          transactions,
-          mealPlan: extractedMealPlan,
-        } = extractData(html);
-        setDiningDollars(diningDollars);
-        setLionBucks(lionBucks);
-        setMealSwipes(mealSwipes);
-        setGuestSwipes(guestSwipes);
-        setTransactions(transactions);
-        setMealPlan(extractedMealPlan);
+        const extracted = extractData(html);
+
+        setDiningDollars(extracted.diningDollars);
+        setLionBucks(extracted.lionBucks);
+        setMealSwipes(extracted.mealSwipes);
+        setGuestSwipes(extracted.guestSwipes);
+        setTransactions(extracted.transactions);
+        setMealPlan(extracted.mealPlan);
+
       } catch (err) {
-        const errorMessage =
-          err instanceof Error ? err.message : "An unknown error occurred";
-        setError(errorMessage);
-        console.error(err);
+        const msg = err instanceof Error ? err.message : "Unknown error";
+        setError(msg);
+        console.log(err);
       } finally {
         setIsLoading(false);
       }
@@ -245,15 +238,48 @@ export function useMealSwipeData() {
     [scrapeWithLogin]
   );
 
+  const toNumber = (val: string | null): number => {
+    if (!val) return 0;
+    return Number(val.replace(/[^0-9.]/g, ""));
+  };
+
+  useEffect(() => {
+    const loadCredentials = async () => {
+      try {
+        const savedUser = await AsyncStorage.getItem("username");
+        const savedPass = await AsyncStorage.getItem("password");
+
+        if (savedUser && savedPass) {
+          setUsername(savedUser);
+          setPassword(savedPass);
+          await fetchMealData(savedUser, savedPass);
+        }
+      } catch (err) {
+        console.log("Error loading credentials", err);
+      }
+    };
+
+    loadCredentials();
+  }, [fetchMealData]);
+
   return {
-    diningDollars,
-    lionBucks,
-    mealSwipes,
-    guestSwipes,
+    username,
+    password,
+    diningDollars: toNumber(diningDollars),
+    lionBucks: toNumber(lionBucks),
+    mealSwipes: toNumber(mealSwipes),
+    guestSwipes: toNumber(guestSwipes),
     transactions,
-    mealPlan,
+    // mealPlan,
+    mealPlan: {
+      name: mealPlan.name,
+      totalMeals: Number(mealPlan.totalMeals),
+      totalDiningDollars: Number(mealPlan.totalDiningDollars),
+      totalGuestSwipes: Number(mealPlan.totalGuestSwipes),
+    },
     isLoading,
     error,
     fetchMealData,
+    saveCredentials,
   };
 }

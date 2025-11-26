@@ -2,39 +2,22 @@ import Separator from '@/components/Separator';
 import { Text } from '@/components/Themed';
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
-import { useTransactions } from '@/contexts/TransactionContext';
 import { useMealSwipeData } from "@/hooks/use-meal-swipe-data";
 import { useEffect, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, TextInput, Linking } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const BASE_URL = "https://api.fhumealtracker.fhu.edu/data.json"
-
 export default function HomeScreen() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const { totalsByTag } = useTransactions();
 
   const {
-    diningDollars,
-    lionBucks,
-    mealSwipes,
-    guestSwipes,
     mealPlan,
-    // isLoading,
-    // error,
+    isLoading,
+    error,
     fetchMealData,
   } = useMealSwipeData();
-
-  const getData = async () => {
-    const response = await fetch(BASE_URL)
-    const data = await response.json()
-
-    console.log(data)
-
-    setMealsRemaining(data.meals.remaining);
-  }
 
   useEffect(() => {
     const loadCredentials = async () => {
@@ -56,31 +39,8 @@ export default function HomeScreen() {
     loadCredentials();
   }, []);
 
-  const [mealsRemaining, setMealsRemaining] = useState(0)
-
-  const totalLionBucks = 180.00;
-
-  const totalDD = 150.00;
-  const remainingDD = totalDD - totalsByTag['Starbucks'];
-
-  const totalMeals = 14;
-  const remainingMeals = totalMeals - totalsByTag['Jones'];
-
-  const totalLionsPride = 5;
-  const remainingLionsPride = totalLionsPride - totalsByTag['LP'];
-
-  const totalCFA = 2;
-  const remainingCFA = totalCFA - totalsByTag['CFA'];
-
-  const handleGetHtml = async () => {
-    try {
-      await AsyncStorage.setItem("username", username);
-      await AsyncStorage.setItem("password", password);
-
-      await fetchMealData(username, password);
-    } catch (err) {
-      console.log("Login error:", err);
-    }
+  const handleGetHtml = () => {
+    fetchMealData(username, password);
   };
 
   return (
@@ -129,10 +89,6 @@ export default function HomeScreen() {
 
           <Text style={styles.profileItem}>
             Dining Dollars: ${mealPlan?.totalDiningDollars ?? "-"}
-          </Text>
-
-          <Text style={styles.profileItem}>
-            Lion Bucks: ${lionBucks ?? "-"}
           </Text>
         </ThemedView>
 
